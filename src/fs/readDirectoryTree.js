@@ -16,9 +16,11 @@ export default function readDirectoryTree(directory) {
             };
           }
         });
-        dirInfo.type = 'directory';
-        dirInfo.directory = directory;
-        return dirInfo;
+        return {
+          type: 'directory',
+          directory,
+          children: dirInfo
+        };
       })
     } else {
       return {
