@@ -4,7 +4,7 @@ export default function readDirectoryTree(directory) {
   return fs.promises.stat(directory).then(stat=> {
     if (stat.isDirectory()) {
       return fs.promises.readdir(directory).then(files=> {
-        return Promise.allSettled(files.map(v=>readDirectoryTree(pathPlus.joinRalativePath(directory, v))));
+        return Promise.allSettled(files.map(v=>readDirectoryTree(pathPlus.joinRelativePath(directory, v))));
       }).then(r=> {
         const dirInfo = r.map(v=> {
           if(v.status === 'fulfilled') {
