@@ -1,17 +1,19 @@
 import fs from 'fs';
-import path from 'path';
+import pathPlus from './pathPlus.js';
 export default function readDirectoryTree(directory) {
   return fs.promises.stat(directory).then(stat=> {
     if (stat.isDirectory()) {
       return fs.promises.readdir(directory).then(files=> {
-        console.log(files);
-        return Promise.allSettled(files.map(v=>readDirectoryTree(path.resolve(directory, v))));
+        return Promise.allSettled(files.map(v=>readDirectoryTree(pathPlus.joinRalativePath(directory, v))));
       }).then(r=> {
         const dirInfo = r.map(v=> {
           if(v.status === 'fulfilled') {
             return v.value;
           }else if(v.status === 'rejected'){
-            return v.reason;
+            return {
+              type: 'error',
+              error: v.reason
+            };
           }
         });
         dirInfo.type = 'directory';
