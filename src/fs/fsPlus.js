@@ -25,8 +25,44 @@ async function createDirectory (directory){
     return false;
   }
 }
+
+async function removeFile (file){
+  const [err, stat] = await PA(fs.promises.stat(file));
+  if(err) {
+    //没有信息默认无目录或文件，返回true
+    return true;
+  }
+  if(stat.isFile()) {
+    const [err] = await PA(fs.promises.unlink(file));
+    if(!err) {
+      return true;
+    }else {
+      return false;
+    }
+  }else if(stat.isDirectory()) {
+    const [err, filelist] = await PA(fs.promises.readdir(file));
+    if(err) {
+      //没有信息默认无目录或文件，返回true
+      return true;
+    }
+    //遍历递归删除文件
+    if(filelist.length > 0) {
+      const [e] = await PA(Promise.all(filelist.map(v=> removeFile(path.join(file ,v)))));
+      if(e) {
+        return false;
+      }
+    }
+    //删除目录
+    const [rmdirErr] = await PA(fs.promises.rmdir(file));
+    if(rmdirErr) {
+      return false;
+    }
+    return true;
+  }
+}
 const extendsFunctions = {
-  createDirectory
+  createDirectory,
+  removeFile
 }
 const fsPlus = Object.assign(fs, extendsFunctions);
 export default fsPlus;
